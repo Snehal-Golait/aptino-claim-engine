@@ -1,0 +1,45 @@
+{
+  "case_id": "CUST-004",
+  "policy_id": "USGIC-CSC-2017-2018",
+  "policy_start_date": "2024-01-01",
+  "claim_date": "2026-06-15",
+  "sum_insured_inr": 500000,
+  "continuous_coverage_months": 29,
+  "prior_insurer_continuous_years": 0,
+  "patient": {
+    "age": 48,
+    "gender": "male"
+  },
+  "hospital": {
+    "name": "Apollo Clinic",
+    "network_provider": true
+  },
+  "treatment": {
+    "type": "inpatient",
+    "admission_hours": 72,
+    "diagnosis": "Acute Nephrolithiasis (Kidney Stones)",
+    "procedure": "Ureteroscopy and Laser Lithotripsy",
+    "pre_existing": false,
+    "experimental": false
+  },
+  "expenses_inr": {
+    "room": 12000,
+    "doctor_fees": 30000,
+    "medicines_diagnostics": 40000,
+    "pre_hospitalization": 12000,
+    "post_hospitalization": 16000,
+    "ambulance": 0
+  },
+  "expense_timing": {
+    "pre_hospitalization_days_before_admission": 45,
+    "post_hospitalization_days_after_discharge": 90,
+    "same_condition_confirmed": true
+  },
+  "documents": [
+    "claim_form",
+    "discharge_summary",
+    "itemized_bill",
+    "pre_post_consultation_bills"
+  ],
+  "task": "Assess admissibility and apply deductions for pre-hospitalization (45 days) and post-hospitalization (90 days) exceeding policy time windows."
+}

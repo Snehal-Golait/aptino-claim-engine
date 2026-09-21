@@ -1,0 +1,40 @@
+{
+  "case_id": "CUST-002",
+  "policy_id": "USGIC-CSC-2017-2018",
+  "policy_start_date": "2024-01-01",
+  "claim_date": "2026-07-20",
+  "sum_insured_inr": 500000,
+  "continuous_coverage_months": 30,
+  "prior_insurer_continuous_years": 0,
+  "patient": {
+    "age": 42,
+    "gender": "female"
+  },
+  "hospital": {
+    "name": "Global Multispeciality Hospital",
+    "network_provider": true
+  },
+  "treatment": {
+    "type": "inpatient",
+    "admission_hours": 72,
+    "diagnosis": "Bacterial Pneumonia and Elective Cosmetic Scar Revision",
+    "procedure": "Pneumonia Inpatient Management and Cosmetic Surgery",
+    "pre_existing": false,
+    "experimental": false
+  },
+  "expenses_inr": {
+    "room": 15000,
+    "doctor_fees": 40000,
+    "medicines_diagnostics": 50000,
+    "pre_hospitalization": 3000,
+    "post_hospitalization": 4000,
+    "ambulance": 0
+  },
+  "documents": [
+    "claim_form",
+    "discharge_summary",
+    "itemized_bill",
+    "physician_prescription"
+  ],
+  "task": "Adjudicate a multi-diagnosis hospitalization involving covered pneumonia management and an incidental excluded cosmetic procedure."
+}

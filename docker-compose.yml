@@ -1,0 +1,20 @@
+services:
+  claim-engine:
+    build: .
+    container_name: aptino-claim-engine
+    restart: unless-stopped
+    ports:
+      - "8000:8000"   # FastAPI Backend & Swagger UI
+      - "8501:8501"   # Streamlit Interactive Dashboard
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_MODEL=${GROQ_MODEL:-qwen/qwen3.8-27b}
+      - DENSE_TOP_K=${DENSE_TOP_K:-15}
+      - SPARSE_TOP_K=${SPARSE_TOP_K:-15}
+      - FUSION_TOP_K=${FUSION_TOP_K:-10}
+      - RERANK_TOP_K=${RERANK_TOP_K:-5}
+      - BACKEND_URL=http://localhost:8000
+    volumes:
+      - ./data:/app/data
+      - ./storage:/app/storage
+      - ./eval/results:/app/eval/results

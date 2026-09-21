@@ -1,0 +1,40 @@
+{
+  "case_id": "CUST-003",
+  "policy_id": "USGIC-CSC-2017-2018",
+  "policy_start_date": "2026-01-01",
+  "claim_date": "2026-02-05",
+  "sum_insured_inr": 500000,
+  "continuous_coverage_months": 1.1,
+  "prior_insurer_continuous_years": 0,
+  "patient": {
+    "age": 30,
+    "gender": "male"
+  },
+  "hospital": {
+    "name": "St. Jude Hospital",
+    "network_provider": true
+  },
+  "treatment": {
+    "type": "inpatient",
+    "admission_hours": 48,
+    "diagnosis": "Acute Gastroenteritis",
+    "procedure": "Intravenous Fluid and Medical Management",
+    "pre_existing": false,
+    "experimental": false
+  },
+  "expenses_inr": {
+    "room": 10000,
+    "doctor_fees": 12000,
+    "medicines_diagnostics": 25000,
+    "pre_hospitalization": 1500,
+    "post_hospitalization": 2000,
+    "ambulance": 800
+  },
+  "documents": [
+    "claim_form",
+    "discharge_summary",
+    "itemized_bill",
+    "pathology_reports"
+  ],
+  "task": "Determine whether an illness diagnosed 35 days after policy inception is admissible past the 30-day initial waiting period."
+}

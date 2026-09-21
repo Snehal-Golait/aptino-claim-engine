@@ -1,0 +1,42 @@
+{
+  "case_id": "CUST-005",
+  "policy_id": "USGIC-CSC-2017-2018",
+  "policy_start_date": "2024-01-01",
+  "claim_date": "2026-08-01",
+  "sum_insured_inr": 500000,
+  "continuous_coverage_months": 31,
+  "prior_insurer_continuous_years": 0,
+  "patient": {
+    "age": 60,
+    "gender": "female"
+  },
+  "hospital": {
+    "name": "Home Care Health Partners",
+    "network_provider": false
+  },
+  "treatment": {
+    "type": "domiciliary",
+    "admission_hours": 48,
+    "treatment_days": 2,
+    "diagnosis": "Severe Lumbago and Sciatica",
+    "procedure": "Domiciliary Nursing and Physiotherapy",
+    "pre_existing": false,
+    "hospital_room_unavailable": false,
+    "patient_cannot_be_moved": true,
+    "experimental": false
+  },
+  "expenses_inr": {
+    "room": 0,
+    "doctor_fees": 15000,
+    "medicines_diagnostics": 25000,
+    "pre_hospitalization": 0,
+    "post_hospitalization": 0,
+    "ambulance": 0
+  },
+  "documents": [
+    "claim_form",
+    "doctor_certificate",
+    "itemized_bill"
+  ],
+  "task": "Determine whether a 2-day domiciliary treatment is excluded under the policy requirement that domiciliary treatment must exceed three days."
+}

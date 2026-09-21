@@ -1,0 +1,46 @@
+{
+  "case_id": "CUST-001",
+  "policy_id": "USGIC-CSC-2017-2018",
+  "policy_start_date": "2026-05-01",
+  "claim_date": "2026-08-15",
+  "sum_insured_inr": 500000,
+  "continuous_coverage_months": 3.5,
+  "prior_insurer_continuous_years": 0.5,
+  "patient": {
+    "age": 55,
+    "gender": "male"
+  },
+  "hospital": {
+    "name": "Apex Eye Institute",
+    "network_provider": true
+  },
+  "treatment": {
+    "type": "day_care",
+    "admission_hours": 8,
+    "diagnosis": "Senile Cataract",
+    "procedure": "Phacoemulsification Eye Surgery",
+    "pre_existing": false,
+    "experimental": false
+  },
+  "expenses_inr": {
+    "room": 0,
+    "doctor_fees": 20000,
+    "medicines_diagnostics": 45000,
+    "pre_hospitalization": 0,
+    "post_hospitalization": 0,
+    "ambulance": 0
+  },
+  "documents": [
+    "claim_form",
+    "discharge_summary",
+    "itemized_bill",
+    "prior_policy_records"
+  ],
+  "prior_policy": {
+    "insurer_type": "Indian General Insurer",
+    "continuous_years": 0.5,
+    "database_and_claim_history_received": true,
+    "previous_sum_insured_inr": 500000
+  },
+  "task": "Determine whether portability credit of 6 months (0.5 year) combined with 3.5 months current coverage satisfies the 1-year Cataract waiting period."
+}

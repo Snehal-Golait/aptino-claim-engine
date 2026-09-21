@@ -1,0 +1,33 @@
+# --- Core ---
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+pydantic==2.10.4
+python-dotenv==1.0.1
+
+# --- PDF ingestion ---
+pdfplumber==0.11.4
+
+# --- Retrieval ---
+# chromadb ships a built-in lightweight ONNX embedding function (all-MiniLM-L6-v2)
+# so we get dense retrieval without pulling in torch (kept out deliberately to
+# stay small/fast on free-tier deployment infra). See README "Design Decisions".
+# NOTE: pinned to 1.x, not 0.5.23 — 0.5.23 hard-pins chroma-hnswlib==0.7.6, which
+# has no prebuilt Windows wheel for Python 3.12/3.13 and forces a from-source
+# build requiring MSVC Build Tools. chromadb>=1.0 bundles its vector index
+# natively and no longer depends on chroma-hnswlib for a normal install.
+chromadb==1.0.20
+rank-bm25==0.2.2
+
+# --- LLM client (Groq: free-tier, OpenAI-compatible) ---
+groq==0.13.1
+
+# --- Frontend ---
+streamlit==1.41.1
+requests==2.32.3
+
+# --- Eval / utils ---
+pandas==2.2.3
+tqdm==4.67.1
+
+# --- Testing ---
+pytest==8.3.4
