@@ -112,9 +112,10 @@ uvicorn src.api.main:app --host 0.0.0.0 --port 8000
 Interactive Swagger documentation is available at `http://localhost:8000/docs`.
 
 ### Endpoints
-- `GET /health` — Verifies retriever readiness, Chroma collection count, and BM25 index status.
-- `GET /cases` — Returns the list of standard public test cases.
-- `POST /adjudicate` — Adjudicates a single claim case through the 5-agent pipeline.
+- `GET  /health` — Verifies retriever readiness, Chroma collection count, and BM25 index status.
+- `GET  /cases` — Returns the list of standard public test cases.
+- `POST /analyze` — **(Assignment spec endpoint)** Analyzes a single claim and returns the specification-compliant response (`ADMISSIBLE` / `ADMISSIBLE_WITH_LIMITS` / `NOT_ADMISSIBLE` / `NEEDS_REVIEW`) with full citations, key findings, applicable limits, validation status, and agent trace.
+- `POST /adjudicate` — Internal alias returning extended response (includes itemized deductions, full state, confidence signal).
 - `POST /adjudicate/batch` — Batch adjudication for evaluation and bulk processing.
 
 ---
@@ -193,3 +194,48 @@ The test suite covers:
 - `tests/test_agents.py`: Claim math, waiting period deductions, sub-limit capping, and anti-hallucination guard.
 - `tests/test_retrieval.py`: Dense search, BM25 sparse search, RRF rank fusion, and Retriever confidence signals.
 - `tests/test_api.py`: FastAPI `/health`, `/cases`, and `/adjudicate` endpoints.
+
+---
+
+## Architecture Design Note
+
+See [`ARCHITECTURE.md`](./ARCHITECTURE.md) for the full 2-page design document covering:
+- Agent boundaries and structured state flow diagram
+- Retrieval design: meaningful chunking, hybrid retrieval, RRF, LLM reranking
+- Key design decisions and trade-offs table
+- Abstention design (three distinct abstention mechanisms)
+- Known limitations
+
+---
+
+## Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/Snehal-Golait/aptino-claim-engine.git
+cd aptino-claim-engine
+
+# 2. Create virtual environment
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+# source .venv/bin/activate  # Linux/macOS
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Set environment variables
+copy .env.example .env
+# Edit .env and add your GROQ_API_KEY
+
+# 5. Ingest the policy PDF (first-time only)
+python -m src.ingestion.ingest
+
+# 6. Run the API
+uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+
+# 7. Run the frontend (new terminal)
+streamlit run src/frontend/app.py --server.port 8501
+
+# 8. Run evaluation
+python -m eval.eval
+```

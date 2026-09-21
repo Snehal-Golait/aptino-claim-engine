@@ -1,7 +1,8 @@
 """FastAPI backend for the Aptino Multi-Agent Health Insurance Claim Decision Engine.
 
 Endpoints:
-  POST /adjudicate       - Submit a claim case for multi-agent adjudication
+  POST /analyze          - Analyze one claim case (assignment spec endpoint)
+  POST /adjudicate       - Submit a claim case for multi-agent adjudication (alias)
   POST /adjudicate/batch - Batch adjudication
   GET  /cases            - List all public test cases
   GET  /cases/{id}       - Get a specific test case by ID
@@ -94,6 +95,29 @@ class AdjudicateResponse(BaseModel):
     supporting_findings: list[dict[str, Any]]
     processing_time_seconds: float
     full_state: dict[str, Any]
+
+
+# Assignment-spec response schema (Section 5 of the take-home)
+class AnalyzeResponse(BaseModel):
+    """Structured response matching the exact contract from the assignment specification."""
+    case_id: str
+    decision: str  # ADMISSIBLE | ADMISSIBLE_WITH_LIMITS | PARTIALLY_ADMISSIBLE | NOT_ADMISSIBLE | NEEDS_REVIEW
+    confidence: float
+    key_findings: list[dict[str, Any]]
+    applicable_limits: list[dict[str, Any]]
+    missing_evidence: list[str]
+    citations: list[dict[str, Any]]
+    validation: dict[str, Any]
+    trace: list[dict[str, Any]]
+
+
+# Map our internal decision labels → assignment-spec labels
+_STATUS_MAP: dict[str, str] = {
+    "APPROVED": "ADMISSIBLE",
+    "PARTIALLY_APPROVED": "ADMISSIBLE_WITH_LIMITS",
+    "REJECTED": "NOT_ADMISSIBLE",
+    "NEEDS_REVIEW": "NEEDS_REVIEW",
+}
 
 
 class HealthResponse(BaseModel):
@@ -195,6 +219,93 @@ async def adjudicate(request: AdjudicateRequest) -> AdjudicateResponse:
         supporting_findings=[f.model_dump() for f in dec.supporting_findings],
         processing_time_seconds=round(elapsed, 2),
         full_state=state.model_dump(),
+    )
+
+
+@app.post("/analyze", response_model=AnalyzeResponse, tags=["Adjudication"])
+async def analyze(request: AdjudicateRequest) -> AnalyzeResponse:
+    """Assignment-spec endpoint: analyze one claim case and return the structured decision.
+
+    Maps internal decision statuses to the spec-required vocabulary:
+      APPROVED            -> ADMISSIBLE
+      PARTIALLY_APPROVED  -> ADMISSIBLE_WITH_LIMITS
+      REJECTED            -> NOT_ADMISSIBLE
+      NEEDS_REVIEW        -> NEEDS_REVIEW
+    """
+    raw = request.model_dump()
+    logger.info(f"[API] /analyze for case: {raw.get('case_id')}")
+
+    t0 = time.perf_counter()
+    try:
+        state: CaseState = run_case(raw)
+    except Exception as e:
+        logger.error(f"[API] Pipeline error for {raw.get('case_id')}: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Pipeline failed: {str(e)}",
+        )
+    elapsed = time.perf_counter() - t0
+
+    dec = state.decision
+    assert dec is not None
+
+    # Build spec-compliant citations list
+    citations = []
+    for finding in dec.supporting_findings:
+        if finding.citation_chunk_id:
+            citations.append({
+                "claim": finding.claim,
+                "source": "policy.pdf",
+                "page": int(finding.citation_pages.split("-")[0]) if finding.citation_pages else 0,
+                "section": finding.citation_section or "",
+                "chunk_id": finding.citation_chunk_id,
+            })
+
+    # Build spec-compliant key_findings
+    key_findings = [
+        {
+            "issue": f.issue,
+            "applies": f.applies,
+            "claim": f.claim,
+            "citation": f.citation_chunk_id,
+        }
+        for f in dec.supporting_findings
+    ]
+
+    # Build spec-compliant applicable_limits from deductions
+    applicable_limits = [
+        {
+            "category": d.category,
+            "claimed_inr": d.claimed_inr,
+            "deduction_inr": d.deduction_inr,
+            "policy_clause": d.policy_clause,
+        }
+        for d in dec.deductions
+    ]
+
+    # Validation block
+    unsupported = [n for n in dec.validation_notes if "FAIL" in n.upper() or "unverified" in n.lower()]
+    validation_status = "FAIL" if unsupported else "PASS"
+
+    # Trace: agent-level actions and timings
+    trace = [
+        {"agent": "Case Analysis", "action": f"Generated {len(state.plan.queries) if state.plan else 0} retrieval queries", "elapsed_ms": None},
+        {"agent": "Policy Evidence", "action": f"Retrieved {sum(len(b.chunks) for b in state.evidence_bundles)} chunks across {len(state.evidence_bundles)} bundles", "elapsed_ms": None},
+        {"agent": "Coverage & Exclusion", "action": f"Evaluated {len(state.findings)} findings", "elapsed_ms": None},
+        {"agent": "Decision Engine", "action": f"Status={dec.status}, Approved=INR {dec.approved_amount_inr:,.0f}, Deductions={len(dec.deductions)}", "elapsed_ms": None},
+        {"agent": "Validation Guard", "action": f"Checked {len(citations)} citations — {validation_status}", "elapsed_ms": round(elapsed * 1000, 0)},
+    ]
+
+    return AnalyzeResponse(
+        case_id=state.case.case_id,
+        decision=_STATUS_MAP.get(dec.status, dec.status),
+        confidence=state.confidence_signal,
+        key_findings=key_findings,
+        applicable_limits=applicable_limits,
+        missing_evidence=dec.missing_evidence,
+        citations=citations,
+        validation={"status": validation_status, "unsupported_claims": unsupported},
+        trace=trace,
     )
 
 
